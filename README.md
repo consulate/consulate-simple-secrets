@@ -21,7 +21,7 @@ app.plugin(ss({
 
 This will return encrypted tokens with embedded token information:
 
-```json
+```js
 {
   u: 'user-id',
   s: ['scope1', 'scope2'],
