@@ -4,9 +4,10 @@
 var ss = require("simple-secrets");
 
 /**
- * 75.83333333 days
+ * Defines
  */
-var 75_DAYS_MS = 3600000 * 1820;
+var MS_PER_HOUR = 60 * 60 * 1000
+  , DEFAULT_TTL = Math.pow(2, 16) * MS_PER_HOUR;
 
 module.exports = function(options) {
   // Check that they gave us a key to sign
@@ -17,7 +18,7 @@ module.exports = function(options) {
     , sender = ss(key);
 
   // Save the ttl
-  var ttl = options.ttl || 75_DAYS_MS;
+  var ttl = options.ttl || DEFAULT_TTL;
 
   // Allow the consumer to map scopes to a compressed enum value
   var compressScope = options.compressScope || function(scope) { return scope };
@@ -39,5 +40,5 @@ module.exports = function(options) {
 };
 
 function expire(ttl) {
-  return Math.floor((Date.now() % ttl)/100000)
+  return Math.floor((Date.now() % ttl) / MS_PER_HOUR)
 };
