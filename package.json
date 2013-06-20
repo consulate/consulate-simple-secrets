@@ -20,5 +20,9 @@
   "readmeFilename": "README.md",
   "dependencies": {
     "simple-secrets": "~1.0.0"
+  },
+  "devDependencies": {
+    "should": "~1.2.2",
+    "mocha": "~1.11.0"
   }
 }

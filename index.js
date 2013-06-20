@@ -23,7 +23,7 @@ module.exports = function(options) {
   // Allow the consumer to map scopes to a compressed enum value
   var compressScope = options.compressScope || function(scope) { return scope };
 
-  return function(app) {
+  function register(app) {
     app.issueToken(function(client, user, scope, done) {
       // Create a token with simple-secrets
       // We use short variable names since we want to keep the size of our token down
@@ -37,6 +37,11 @@ module.exports = function(options) {
       done(null, token);
     });
   };
+
+  // Expose the sender
+  register.sender = sender;
+
+  return register;
 };
 
 function expire(ttl) {
