@@ -1,0 +1,24 @@
+{
+  "name": "consulate-simple-secrets",
+  "version": "0.1.0",
+  "description": "simple-secrets token plugin for consulate",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/consulate/consulate-simple-secrets.git"
+  },
+  "keywords": [
+    "simple",
+    "secrets",
+    "consulate"
+  ],
+  "author": "Cameron Bytheway <cameron@theflokk.com>",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "simple-secrets": "~1.0.0"
+  }
+}
