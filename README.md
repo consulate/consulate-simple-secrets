@@ -1,7 +1,7 @@
 consulate-simple-secrets [![Build Status](https://travis-ci.org/consulate/consulate-simple-secrets.png?branch=master)](https://travis-ci.org/consulate/consulate-simple-secrets)
 ========================
 
-simple-secrets token plugin for [consulate](https://github.com/consulate/consulate)
+[simple-secrets](https://github.com/timshadel/simple-secrets) token plugin for [consulate](https://github.com/consulate/consulate)
 
 Usage
 -----
