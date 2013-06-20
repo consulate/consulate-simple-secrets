@@ -10,7 +10,7 @@ var 75_DAYS_MS = 3600000 * 1820;
 
 module.exports = function(options) {
   // Check that they gave us a key to sign
-  if (!options || !options.key) throw new Error("You must specify a `key` for simple-secrets");
+  if (!options || !options.key) throw new Error("Missing a `key` for simple-secrets signer");
 
   // Create a sender
   var key = new Buffer(options.key, 'hex')
