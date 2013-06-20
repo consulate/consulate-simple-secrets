@@ -4,9 +4,9 @@
 var ss = require("simple-secrets");
 
 /**
- * 2 weeks
+ * 75.83333333 days
  */
-var 75_DAYS_MS = 75 * 25 * 60 * 60 * 1000;
+var 75_DAYS_MS = 3600000 * 1820;
 
 module.exports = function(options) {
   // Check that they gave us a key to sign
