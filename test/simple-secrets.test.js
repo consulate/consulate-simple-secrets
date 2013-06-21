@@ -21,6 +21,11 @@ describe('consulate-simple-secrets', function() {
       'issueToken': function(fn) {
         app.callbacks.issueToken = fn;
       },
+      'callback': function() {
+        return function(done) {
+          done(null, ['user:email', 'user:name', 'user:address']);
+        }
+      },
       callbacks: {}
     };
   });
@@ -48,10 +53,24 @@ describe('consulate-simple-secrets', function() {
       should.exist(tokenInfo.e);
       tokenInfo.c.should.eql('clientId');
       tokenInfo.u.should.eql('userId');
-      tokenInfo.s.should.eql(['user:email', 'user:name']);
+      tokenInfo.s.should.eql(14);
 
       done();
     });
+  });
+
+  it('should efficiently compress a scopes list', function() {
+    var requestedScopes = ['user:email', 'app:products']
+      , scopesEnum = [
+          'user:name',
+          'user:email',
+          'user:address',
+          null, // used for a placeholder i.e. so we can add 'user:phone' in the future
+          'app:products',
+          'app:products:edit'
+        ];
+
+    ssPlugin.compressScope(requestedScopes, scopesEnum).should.eql(82);
   });
 
 });
