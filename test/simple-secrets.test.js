@@ -47,10 +47,15 @@ describe('consulate-simple-secrets', function() {
       , user = {id: 'userId'}
       , scope = ['user:email', 'user:name'];
 
-    app.callbacks.issueToken(client, user, scope, function(err, token) {
-      var tokenInfo = signer.unpack(token);
+    app.callbacks.issueToken(client, user, scope, function(err, accessToken, refreshToken, params) {
+      var tokenInfo = signer.unpack(accessToken);
       should.exist(tokenInfo);
       should.exist(tokenInfo.e);
+      should.not.exist(refreshToken);
+      should.exist(params);
+      // Expect between 10 mins and 2 hours
+      params.expires_in.should.be.lessThan(7201);
+      params.expires_in.should.be.greaterThan(600);
       tokenInfo.c.should.eql('clientId');
       tokenInfo.u.should.eql('userId');
       tokenInfo.s.should.eql(14);

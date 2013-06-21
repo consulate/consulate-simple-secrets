@@ -10,7 +10,7 @@ var debug = require('simple-debug')('consulate-simple-secrets')
  */
 
 var MS_PER_HOUR = 60 * 60 * 1000
-  , DEFAULT_TTL = Math.pow(2, 16) * MS_PER_HOUR;
+  , DEFAULT_RANGE = Math.pow(2, 16) * MS_PER_HOUR;
 
 /**
  * Simple Secrets issue token for consulate
@@ -27,8 +27,7 @@ module.exports = function(options) {
   var key = new Buffer(options.key, 'hex')
     , sender = ss(key);
 
-  // Save the ttl
-  var ttl = options.ttl || DEFAULT_TTL;
+  var ttl = options.ttl || 1;
 
   debug('using ttl of', ttl);
 
@@ -47,18 +46,21 @@ module.exports = function(options) {
       getScopes(function(err, scopesEnum) {
         if (err) return done(err);
 
+        // Our smallest measure is 1 hour, add 0.7 hours to that so expiration is "about #{ttl} hours" from now
+        var expires = at(Date.now() + (ttl+0.7)*MS_PER_HOUR);
+
         // Create a token with simple-secrets
         // We use short variable names since we want to keep the size of our token down
         var token = sender.pack({
           u: user.id,
           s: compress(scope, scopesEnum),
           c: client.id,
-          e: expire(ttl)
+          e: expires
         });
 
         debug('issued token', token);
 
-        done(null, token);
+        done(null, token, null, { expires_in: seconds_from_now(expires) });
       });
     });
   };
@@ -92,13 +94,30 @@ function compressScope(scope, scopesEnum) {
 if (process.env.NODE_ENV === 'test') module.exports.compressScope = compressScope;
 
 /**
- * Create a super-small expiration date
- *
- * To reverse the compression you can use the following logic:
- *
- *     new Date( value * MS_PER_HOUR + Math.floor ( Date.now() / TTL ) * TTL )
+ * Create a super-small date, expressed in hours. It is interpreted as
+ * the number of hours since the last whole 2^16 hours since Jan 1, 1970.
  */
 
-function expire(ttl) {
-  return Math.floor((Date.now() % ttl) / MS_PER_HOUR)
+function at(date_ms, range) {
+  range = range || DEFAULT_RANGE;
+  return Math.floor((date_ms % range) / MS_PER_HOUR)
 };
+
+/**
+ * Convert a super-small date back to a regular JavaScript Date object.
+ */
+
+function when(at, range) {
+  range = range || DEFAULT_RANGE;
+  return new Date(at*MS_PER_HOUR + Math.floor(Date.now()/range)*range);
+}
+
+/**
+ * Returns the distance of the super-small date from now, in seconds.
+ * Used in OAuth2 spec for communicating token expiration times.
+ */
+
+function seconds_from_now(at, range) {
+  range = range || DEFAULT_RANGE;
+  return Math.floor((when(at, range) - Date.now()) / 1000);
+}
