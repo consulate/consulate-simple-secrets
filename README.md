@@ -24,7 +24,7 @@ This will return encrypted tokens with embedded token information:
 ```js
 {
   u: 'user-id',
-  s: ['scope1', 'scope2'],
+  s: 42, // compressed scopes
   c: 'client-id',
   e: 1234 // expiration date
 }
