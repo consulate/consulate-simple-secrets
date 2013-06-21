@@ -52,7 +52,7 @@ module.exports = function(options) {
         // Create a token with simple-secrets
         // We use short variable names since we want to keep the size of our token down
         var token = sender.pack({
-          u: user.id,
+          u: user ? user.id : null,
           s: compress(scope, scopesEnum),
           c: client.id,
           e: expires
