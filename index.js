@@ -3,14 +3,8 @@
  */
 
 var debug = require('simple-debug')('consulate-simple-secrets')
-  , ss = require("simple-secrets");
-
-/**
- * Defines
- */
-
-var MS_PER_HOUR = 60 * 60 * 1000
-  , DEFAULT_RANGE = Math.pow(2, 16) * MS_PER_HOUR;
+  , ss = require("simple-secrets")
+  , SmD = require('smd');
 
 /**
  * Simple Secrets issue token for consulate
@@ -46,8 +40,7 @@ module.exports = function(options) {
       getScopes(function(err, scopesEnum) {
         if (err) return done(err);
 
-        // Our smallest measure is 1 hour, add 0.7 hours to that so expiration is "about #{ttl} hours" from now
-        var expires = at(Date.now() + (ttl+0.7)*MS_PER_HOUR);
+        var expires = SmD.from(Date.now() + (ttl+0.7)*SmD.ms_per_unit);
 
         // Create a token with simple-secrets
         // We use short variable names since we want to keep the size of our token down
@@ -60,7 +53,7 @@ module.exports = function(options) {
 
         debug('issued token', token);
 
-        done(null, token, null, { expires_in: seconds_from_now(expires) });
+        done(null, token, null, { expires_in: SmD.seconds_from_now(expires) });
       });
     });
   };
@@ -92,32 +85,3 @@ function compressScope(scope, scopesEnum) {
 // Expose compressScope for testing
 
 if (process.env.NODE_ENV === 'test') module.exports.compressScope = compressScope;
-
-/**
- * Create a super-small date, expressed in hours. It is interpreted as
- * the number of hours since the last whole 2^16 hours since Jan 1, 1970.
- */
-
-function at(date_ms, range) {
-  range = range || DEFAULT_RANGE;
-  return Math.floor((date_ms % range) / MS_PER_HOUR)
-};
-
-/**
- * Convert a super-small date back to a regular JavaScript Date object.
- */
-
-function when(at, range) {
-  range = range || DEFAULT_RANGE;
-  return new Date(at*MS_PER_HOUR + Math.floor(Date.now()/range)*range);
-}
-
-/**
- * Returns the distance of the super-small date from now, in seconds.
- * Used in OAuth2 spec for communicating token expiration times.
- */
-
-function seconds_from_now(at, range) {
-  range = range || DEFAULT_RANGE;
-  return Math.floor((when(at, range) - Date.now()) / 1000);
-}
