@@ -4,7 +4,8 @@
 
 var debug = require('simple-debug')('consulate-simple-secrets')
   , ss = require("simple-secrets")
-  , SmD = require('smd');
+  , SmD = require('smd')
+  , bitfield = require('bitfield');
 
 /**
  * Simple Secrets issue token for consulate
@@ -31,13 +32,13 @@ module.exports = function(options) {
     var getScopes = app.callback('scopes');
 
     // Allow the consumer to map scopes to a compressed enum value
-    var compress = options.compressScope || compressScope;
+    var compress = options.compressScope || bitfield.pack;
 
-    app.issueToken(function(client, user, scope, done) {
-      debug('issuing token for client', client, 'and user', user, 'with scope', scope);
+    app.issueToken(function(client, user, scopes, done) {
+      debug('issuing token for client', client, 'and user', user, 'with scopes', scopes);
 
       // Get a list of the scopes enum
-      getScopes(function(err, scopesEnum) {
+      getScopes(function(err, availableScopes) {
         if (err) return done(err);
 
         var expires = SmD.from(Date.now() + (ttl+0.7)*SmD.ms_per_unit);
@@ -46,7 +47,7 @@ module.exports = function(options) {
         // We use short variable names since we want to keep the size of our token down
         var token = sender.pack({
           u: user ? user.id : null,
-          s: compress(scope, scopesEnum),
+          s: compress(scopes, availableScopes),
           c: client.id,
           e: expires
         });
@@ -63,25 +64,3 @@ module.exports = function(options) {
 
   return register;
 };
-
-/**
- * Compress scopes with an emum into an efficient integer
- */
-
-function compressScope(scope, scopesEnum) {
-  var scopes = typeof scope === 'string'
-    ? scope.split(' ')
-    : scope;
-
-  var value = '1' + scopesEnum.map(function(scope) {
-    return !!~scopes.indexOf(scope) ? '1' : '0';
-  }).join('');
-
-  debug('compressing', scopes, 'into', value+'b');
-
-  return parseInt(value, 2);
-};
-
-// Expose compressScope for testing
-
-if (process.env.NODE_ENV === 'test') module.exports.compressScope = compressScope;
