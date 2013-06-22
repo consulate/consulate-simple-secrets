@@ -3,7 +3,8 @@
  */
 var should = require('should')
   , ssPlugin = require('..')
-  , ss = require('simple-secrets');
+  , ss = require('simple-secrets')
+  , SmD = require('smd');
 
 /**
  * Defines
@@ -56,6 +57,12 @@ describe('consulate-simple-secrets', function() {
       // Expect between 10 mins and 2 hours
       params.expires_in.should.be.lessThan(7201);
       params.expires_in.should.be.greaterThan(600);
+
+      // Check actual expiration as well
+      var expires_in = (SmD.at(tokenInfo.e) - Date.now()) / 1000;
+      expires_in.should.be.lessThan(7201);
+      expires_in.should.be.greaterThan(600);
+
       tokenInfo.c.should.eql('clientId');
       tokenInfo.u.should.eql('userId');
       tokenInfo.s.should.eql(14);
