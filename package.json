@@ -20,7 +20,8 @@
   "readmeFilename": "README.md",
   "dependencies": {
     "simple-secrets": "~1.0.0",
-    "simple-debug": "~1.1.0"
+    "simple-debug": "~1.1.0",
+    "smd": "~0.1.0"
   },
   "devDependencies": {
     "should": "~1.2.2",
