@@ -4,7 +4,8 @@
 var should = require('should')
   , ssPlugin = require('..')
   , ss = require('simple-secrets')
-  , SmD = require('smd');
+  , SmD = require('smd')
+  , bitfield = require('bitfield');
 
 /**
  * Defines
@@ -15,7 +16,8 @@ describe('consulate-simple-secrets', function() {
 
   var app;
 
-  var signer = ss(new Buffer(SECRET, 'hex'));
+  var signer = ss(new Buffer(SECRET, 'hex'))
+    , availableScopes = ['user:email', 'user:name', 'user:address'];
 
   beforeEach(function() {
     app = {
@@ -24,7 +26,7 @@ describe('consulate-simple-secrets', function() {
       },
       'callback': function() {
         return function(done) {
-          done(null, ['user:email', 'user:name', 'user:address']);
+          done(null, availableScopes);
         }
       },
       callbacks: {}
@@ -65,24 +67,12 @@ describe('consulate-simple-secrets', function() {
 
       tokenInfo.c.should.eql('clientId');
       tokenInfo.u.should.eql('userId');
-      tokenInfo.s.should.eql(14);
+
+      // Check that it decoded the correct scopes
+      bitfield.unpack(new Buffer(tokenInfo.s), availableScopes).should.eql(scope);
 
       done();
     });
-  });
-
-  it('should efficiently compress a scopes list', function() {
-    var requestedScopes = ['user:email', 'app:products']
-      , scopesEnum = [
-          'user:name',
-          'user:email',
-          'user:address',
-          null, // used for a placeholder i.e. so we can add 'user:phone' in the future
-          'app:products',
-          'app:products:edit'
-        ];
-
-    ssPlugin.compressScope(requestedScopes, scopesEnum).should.eql(82);
   });
 
 });
