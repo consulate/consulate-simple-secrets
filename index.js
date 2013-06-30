@@ -45,12 +45,16 @@ module.exports = function(options) {
 
         // Create a token with simple-secrets
         // We use short variable names since we want to keep the size of our token down
-        var token = sender.pack({
-          u: user ? user.id : null,
+        var tokenOpts = {
           s: compress(scopes, availableScopes),
           c: client.id,
           e: expires
-        });
+        };
+
+        // Allow clients to have a detached token
+        if (user) tokenOpts.u = user.id;
+
+        var token = sender.pack(tokenOpts);
 
         debug('issued token', token);
 
