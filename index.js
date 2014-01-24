@@ -58,7 +58,7 @@ module.exports = function(options) {
 
         debug('issued token', token);
 
-        done(null, token, null, { expires_in: SmD.seconds_from_now(expires) });
+        done(null, token, { expires_in: SmD.seconds_from_now(expires) });
       });
     });
   };
