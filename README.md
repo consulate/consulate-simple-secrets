@@ -32,6 +32,21 @@ This will return encrypted tokens with embedded token information:
 
 `TODO` explain how to extract token information
 
+Advanced Usage
+--------------
+
+The options accepts a `transform` function to change the token information. This can be used to add extra fields in the token.
+
+```js
+app.plugin(ss({
+  transform: function(client, user, scope, availableScopes, tokenOpts, done) {
+    // transform the tokenOpts here
+
+    done(null, tokenOpts);
+  }
+}));
+```
+
 Tests
 -----
 

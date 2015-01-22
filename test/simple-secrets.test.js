@@ -50,11 +50,10 @@ describe('consulate-simple-secrets', function() {
       , user = {id: 'userId'}
       , scope = ['user:email', 'user:name'];
 
-    app.callbacks.issueToken(client, user, scope, function(err, accessToken, refreshToken, params) {
+    app.callbacks.issueToken(client, user, scope, function(err, accessToken, params) {
       var tokenInfo = signer.unpack(accessToken);
       should.exist(tokenInfo);
       should.exist(tokenInfo.e);
-      should.not.exist(refreshToken);
       should.exist(params);
       // Expect between 10 mins and 2 hours
       params.expires_in.should.be.lessThan(7201);
@@ -71,6 +70,28 @@ describe('consulate-simple-secrets', function() {
       // Check that it decoded the correct scopes
       bitfield.unpack(new Buffer(tokenInfo.s), availableScopes).should.eql(scope);
 
+      done();
+    });
+  });
+
+  it('should transform the token info', function(done) {
+
+    var instance = ssPlugin({
+      key: SECRET,
+      transform: function(client, user, scope, availableScopes, tokenOpts, cb) {
+        tokenOpts.t = 123;
+        cb(null, tokenOpts);
+      }
+    })(app)
+
+    var client = {id: 'clientId'}
+      , user = {id: 'userId'}
+      , scope = ['user:email', 'user:name'];
+
+    app.callbacks.issueToken(client, user, scope, function(err, accessToken, params) {
+      var tokenInfo = signer.unpack(accessToken);
+      should.exist(tokenInfo.t);
+      tokenInfo.t.should.eql(123);
       done();
     });
   });

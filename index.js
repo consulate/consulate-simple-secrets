@@ -23,6 +23,7 @@ module.exports = function(options) {
     , sender = ss(key);
 
   var ttl = options.ttl || 1;
+  var transform = options.transform || defaultTransform;
 
   debug('using ttl of', ttl);
 
@@ -54,11 +55,15 @@ module.exports = function(options) {
         // Allow clients to have a detached token
         if (user) tokenOpts.u = user.id;
 
-        var token = sender.pack(tokenOpts);
+        transform(client, user, scopes, availableScopes, tokenOpts, function(err, transformedTokenOpts) {
+          if (err) return done(err);
 
-        debug('issued token', token);
+          var token = sender.pack(transformedTokenOpts || tokenOpts);
 
-        done(null, token, { expires_in: SmD.seconds_from_now(expires) });
+          debug('issued token', token);
+
+          done(null, token, { expires_in: SmD.seconds_from_now(expires) });
+        });
       });
     });
   };
@@ -68,3 +73,11 @@ module.exports = function(options) {
 
   return register;
 };
+
+/**
+ * Setup a default transform function
+ */
+
+function defaultTransform(client, user, scope, availableScopes, tokenOpts, done) {
+  done(null, tokenOpts);
+}
