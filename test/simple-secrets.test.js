@@ -68,7 +68,9 @@ describe('consulate-simple-secrets', function() {
       tokenInfo.u.should.eql('userId');
 
       // Check that it decoded the correct scopes
-      bitfield.unpack(new Buffer(tokenInfo.s), availableScopes).should.eql(scope);
+      var tokenBuf = new Buffer(tokenInfo.s, 'utf8');
+      console.log('token', tokenInfo.s, tokenBuf);
+      bitfield.unpack(tokenBuf, availableScopes).should.eql(scope);
 
       done();
     });
